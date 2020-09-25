@@ -1,0 +1,26 @@
+   A=IN2
+   B=A,A=IN1
+   
+   ; while A > 0:
+   ;   if lo bit(A), res += B
+   ;   A >>= 1, B <<= 1
+
+nolo:
+   ; A = lhs, B = rhs, C = res
+   A=A>>1,F=NEG(A>>1)
+   A=B,D=A,JMPT lo
+nlc:
+   B=A+B,A=D,JMP nolo
+   
+lo:
+   ; D = lhs, A = rhs, C = res
+   ; we need to add rhs to res, and then double rhs to continue
+   ; we also need to check whether A is zero and we should break
+   A=D,D=A,B=C
+   F=ZERO(-A),A=D,D=A
+   W=C=A+B,B=A,JMPF nlc
+
+done:
+   A=IN2,C=0
+   OUT1=W,JMP nolo,B=A,A=IN1
+

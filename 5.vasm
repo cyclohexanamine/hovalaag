@@ -1,0 +1,34 @@
+   
+   ; The strategy here is to ensure that both decoding loops
+   ; are one-cycle. This requires buffering two extra inputs.
+   ; We can take advantage of the fact that both kinds of decoding
+   ; will be writing the first input value at least once to store
+   ; x[t-2] in W. x[t-1] is stored in A most of the time.
+   
+   
+   A=IN1
+   W=A,A=IN2
+   
+st0:
+   ; W = x[t-1], A = IN2
+   F=POS(-A),C=-A,B=A,A=IN1
+   
+start:
+   ; W = x[t-2], A = x[t-1], B = IN2, F = NEG(B)
+   JMPT load
+
+copy:
+   ; copy C numbers from IN1 to OUT1
+   C=B
+cplp:
+   A=IN1,OUT1=W,W=A,DECNZ cplp
+   ; W is x[t-1], A is x[t]
+   D=A,A=IN2
+   JMP start,F=POS(-A),C=-A,B=A,A=D
+
+load:
+   ; load IN1 and write it -B times to OUT1
+ldlp:
+   OUT1=W,DECNZ ldlp
+   ; A is x[t-1]
+   JMP st0,W=A,A=IN2

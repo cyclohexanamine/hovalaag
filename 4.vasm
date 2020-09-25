@@ -1,0 +1,43 @@
+   ; The strategy here is to set up a one-cycle loop for the initial state:
+   ;
+   ;  st1:
+   ;     A=IN1,C=A^4,F=ZERO(A^4),JMPF st1
+   ; 
+   ; Imagine we have a sequence such as [3, 3, 4, 5, 2, 3]:
+   ;
+   ;    t   |  A = x[t]  |  C = A^4   |  jumping?  |
+   ;   ---------------------------------------------
+   ;    0   |     3      |            |            |
+   ;    1   |     3      |     7      |            |
+   ;    2   |     4      |     7      |     yes    |
+   ;    3   |     5      |     0      |     yes    |
+   ;    4   |     2      |     6      |     no     |
+   ;
+   ; By the time we exit the loop - since x[2] = 4 - we've already read x[3] and x[4].
+   ; x[4] is in A, and the result of x[3]^4 is in C. We then need to check the values of
+   ; x[3] and x[4], and safely re-enter the loop in the correct state.
+   ; In this version, the output is written two cycles behind the input.
+   
+   
+   ; at the beginning
+   A=IN1,B=4
+   ; x[t] is in A and might be 4
+   A=IN1,F=ZERO(A^B),C=A^B,W=0
+st1:
+   ; x[t] is in A and might be 4; F is 1 if x[t-1] = 4
+   JMPF st1,A=IN1,F=ZERO(A^B),C=A^B,OUT1=W,W=0
+
+st2:
+   ; Now x[t-2] is 4, 4^x[t-1] is in C, and x[t] is in A
+   ; 4^5=1
+   DECNZ st1,F=ZERO(C)  ; x[t-1] != 5, so get back into st1
+   
+   ; Now x[t-2] is 4, x[t-1] is 5, and x[t] is in A
+   B=1
+   F=ZERO(A^B),B=4
+   JMPF st1,A=IN1,F=ZERO(A^B),C=A^B,OUT1=W   ; x[t] != 1, so get back into st1
+   
+match:
+   ; If we're here, x[t-1] is 1, so we're guaranteed to spend a cycle in st1.
+   ; But I don't see a way to avoid it given that we need to set W
+   JMP st1,W=1

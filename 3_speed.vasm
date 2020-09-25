@@ -1,0 +1,30 @@
+   A=IN1,B=20
+   B=D=A,C=B
+   
+loop1:
+   ; A is max, D is min, B is input
+   F=POS(B-A),A=D,D=A                ; F: A<B, so new max
+   ; D is max, A is min, B is input
+   JMPT nonew,F=NEG(B-A),A=D,D=A     ; F: A>B, so new min
+   JMPT newmin,B=A,A=B
+   
+nonew:
+   ; B is max, D is min
+   A=IN1
+   ; B is max, D is min, A is input
+   DECNZ loop1,B=A,A=B
+   JMP done
+   
+newmin:
+   ; B is max, A is min
+   A=IN1,D=A
+   ; B is max, D is min, A is input
+   DECNZ loop1,B=A,A=B
+   JMP done
+   
+done:
+   ; A is max, D is min
+   ; output results
+   W=A,A=D
+   OUT1=W,W=A
+   OUT1=W

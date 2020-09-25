@@ -1,0 +1,41 @@
+   A=IN1,B=12
+   F=ZERO(-A)
+   C=B,B=1
+   
+parity:
+   JMPT done,W=A,A=A>>1,F=NEG(A>>1)
+
+plp0:
+   ; F = lowest bit of A<<1
+   ; we will stay in this loop while A has contiguous unset low bits
+   ; but isn't zero
+   JMPF plp0,A=A>>1,F=NEG(A>>1)
+
+plp1:
+   ; F = lowest bit of A<<1 and there's a set low bit to count
+   ; we will stay in this loop while A has contiguous set low bits
+   DEC,JMPT plp1,A=A>>1,F=NEG(A>>1)
+   ; the next bit may still be one, so check that
+   JMPF plp3,F=ZERO(-A)
+plp2:
+   ; F = ZERO(A) and there's a set low bit to count
+   ; check whether A is zero and reenter the loop if not
+   DEC,JMPF plp0,A=A>>1,F=NEG(A>>1)
+   JMP done,A=C
+plp3:
+   ; F = ZERO(A)
+   ; check whether A is zero and reenter the loop if not
+   JMPF plp0,A=A>>1,F=NEG(A>>1)
+   A=C
+
+done:
+; when we exit, A = 12 - number of 1 bits in A, and B = 1
+   F=ZERO(A&B),B=A&B,A=IN1
+   JMPT even,B=12,F=ZERO(-A)
+   
+odd:
+   JMP parity,OUT1=W,C=B,B=1
+even:
+   JMP parity,OUT2=W,C=B,B=1
+
+

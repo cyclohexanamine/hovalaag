@@ -1,0 +1,7 @@
+   A=IN1,B=0
+start:
+   C=A|B,A=IN2
+mlp:
+   DECNZ MLP,W=B=A+B
+   OUT1=W,JMP start,A=IN1,B=0
+

@@ -1,0 +1,17 @@
+   A=IN1
+   
+parity:
+   B=A,W=A
+plp:
+   A=A>>1,F=ZERO(A>>1)
+   JMPF plp,B=A^B
+; when we exit, the lowest bit of B will be the parity of A
+   
+   A=B,B=1
+   F=ZERO(A&B)
+   JMPT even,A=IN1
+   
+odd:
+   JMP parity,OUT1=W
+even:
+   JMP parity,OUT2=W

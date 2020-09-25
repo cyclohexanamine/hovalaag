@@ -1,0 +1,6 @@
+   A=IN1
+   B=A,A=IN2
+loop1:
+   W=A+B
+   OUT1=W,W=B-A,A=IN1
+   OUT2=W,JMP loop1,B=A,A=IN2
